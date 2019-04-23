@@ -1,16 +1,16 @@
 /*
- * NAME: TODO First Last
- * PID: TODO Axxxxxxxx
+ * NAME: Zhaoyi Guo
+ * PID: A15180402
  */
 
-
+import java.util.*;
 /**
  * Gene Splicing CRISPR Simulator
  *
  * @author TODO
  * @since TODO
  */
-public class CRISPR {
+public class CRISPR{
 
     /*Sequences to use/test your CRISPR functions on. Please add more as you test*/
     private static String simpleGenome = "ACATATA";
@@ -21,10 +21,22 @@ public class CRISPR {
             + "CAGATGAATATTCTACAGAGTTGCCGTACGCGTTGAACACTTCACGGATGATAGGAATTTGCGTATAGAGCGGGTCATT"
             + "GAAGGAGATTACACTCGTAGTTAACAACGGGCCCGGCTCTATCAGAACACGAGTGCCTTGAATAACATACTCATCACTA";
 
+
     private static String overlappingGuide = "UAU";
     private static String guideRNA = "CUAAUGU";
     private static String splicedGene = "TAGACAT";
-
+    private static String guideRNA1 = "UGU";
+    private static String splicedGene1 = "TAG";
+    private static String simpleGenome1 = "ACATA";
+    private static String guideRNA2 = "UA";
+    private static String splicedGene2 = "CAT";
+    private static String simpleGenome2 = "ATATA";
+    private static String guideRNA3 = "UAU";
+    private static String splicedGene3 = "CAT";
+    private static String simpleGenome3 = "ATATA";
+    private static String guideRNA4 = "CG";
+    private static String splicedGene4 = "CAT";
+    private static String simpleGenome4 = "ATATA";
 
     /**
      * Program Entry, this simply runs
@@ -34,6 +46,15 @@ public class CRISPR {
     public static void main(String[] args) {
         /*Should print out ACATATA (unchanged)*/
         System.out.println(spliceDNA(simpleGenome, overlappingGuide, splicedGene));
+        /*should print out “ACATAGTA” */
+        System.out.println(spliceDNA(simpleGenome1, guideRNA1, splicedGene1));
+        /*should print out “ATCATATCATA” */
+        System.out.println(spliceDNA(simpleGenome2, guideRNA2, splicedGene2));
+        /*should print out “ATATA” */
+        System.out.println(spliceDNA(simpleGenome3, guideRNA3, splicedGene3));
+        /*should print out “ATATA” */
+        System.out.println(spliceDNA(simpleGenome4, guideRNA4, splicedGene4));
+
     }
 
     /**
@@ -47,12 +68,30 @@ public class CRISPR {
     public static String spliceDNA(String genomeSequence, String guideSequence, String splicedSequence) {
         DoublyLinkedList<Character> genome = new DoublyLinkedList<>();
         DoublyLinkedList<Character> guideRNA = new DoublyLinkedList<>();
-
         populateFromDNA(genome, genomeSequence);
         populateDNAFromRNA(guideRNA, guideSequence);
-
-        //TODO: Implement a splicing algorithm with will add the splicedSequence where appropriate to genome
-
+//        System.out.println("Genome: " + transcribeGeneticCode(genome));
+//        System.out.println("Guide sequence: " + guideSequence);
+//        System.out.println("Guide: " + transcribeGeneticCode(guideRNA));
+        //create a new linked list of DNA called spliceSequence
+        //iterating through the list that is created by metch method
+        //if there is no overlapping of guided Node, the spliced node
+        // is added to the genome at the indexes in the match list
+        DoublyLinkedList<Character> splicedNode = new DoublyLinkedList<>();
+        populateFromDNA(splicedNode, splicedSequence);
+        int[] matchedIndex = genome.match(guideRNA);
+        int shiftLength = 0;
+        /* in the for loop, every matched index create a chance to insert the splicedNode,
+        however, if there is an overlap of guideNode, that is, the difference between two indexes is
+        less than the sixe of the guidedNode, the loop stops*/
+        for (int i = 0; i < matchedIndex.length; i++) {
+            if (i != matchedIndex.length-1 && (matchedIndex[i+1] - matchedIndex[i]) < guideRNA.size()) {
+                i++;
+                continue;
+            }
+            genome.splice(matchedIndex[i] + guideRNA.size() +shiftLength, splicedNode);
+            shiftLength += splicedSequence.length();
+        }
         return transcribeGeneticCode(genome);
     }
 
@@ -62,7 +101,11 @@ public class CRISPR {
      * @param dnaString DNA string encoding
      */
     public static void populateFromDNA(DoublyLinkedList<Character> dnaList, String dnaString) {
-        //TODO: Populate dnaList with the characters in s
+        //encoding the genetic code from the String to a LinkedList
+        char[] stringToCharArray = dnaString.toCharArray();
+        for (char output : stringToCharArray) {
+            dnaList.add(output);
+        }
     }
 
     /**
@@ -73,7 +116,28 @@ public class CRISPR {
      * @param rnaString RNA string encoding
      */
     public static void populateDNAFromRNA(DoublyLinkedList<Character> dnaList, String rnaString) {
-        //TODO: Populate dnaList with the DNA representation of the RNA Sequence
+        //encoding the genetic code from the String to a LinkedList also changes the value
+        // of A, U, C, G to T, A, C, G when encountering them
+        char[] stringToCharArray = rnaString.toCharArray();
+        for (char output : stringToCharArray) {
+            //System.out.println("Guide22: " + transcribeGeneticCode(dnaList));
+            if (output == 'A') {
+                dnaList.add('T');
+            }
+            else if (output == 'U') {
+                dnaList.add('A');
+            }
+            else if (output == 'C') {
+                dnaList.add('G');
+            }
+            else if (output == 'G') {
+                dnaList.add('C');
+            }
+            else {
+                dnaList.add(output);
+            }
+        }
+
     }
 
     /**
